@@ -168,30 +168,28 @@ export default function FinanceDashboard() {
   const [connectModalOpen, setConnectModalOpen] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      const load = async (key, seedFn) => {
-        try {
-          const res = await window.storage.get(key);
-          const parsed = res ? JSON.parse(res.value) : null;
-          return parsed && (Array.isArray(parsed) ? parsed.length : true) ? parsed : seedFn();
-        } catch (e) {
-          return seedFn();
-        }
-      };
-      setTransactions(await load("transactions", seedData));
-      setTemplates(await load("recurringTemplates", seedTemplates));
-      setGoals(await load("goals", seedGoals));
-      setAssets(await load("assets", seedAssets));
-      setConnectedAccounts(await load("connectedAccounts", seedConnectedAccounts));
-      setLoaded(true);
-    })();
+    const load = (key, seedFn) => {
+      try {
+        const raw = localStorage.getItem(key);
+        const parsed = raw ? JSON.parse(raw) : null;
+        return parsed && (Array.isArray(parsed) ? parsed.length : true) ? parsed : seedFn();
+      } catch (e) {
+        return seedFn();
+      }
+    };
+    setTransactions(load("cifra_transactions", seedData));
+    setTemplates(load("cifra_templates", seedTemplates));
+    setGoals(load("cifra_goals", seedGoals));
+    setAssets(load("cifra_assets", seedAssets));
+    setConnectedAccounts(load("cifra_connected_accounts", seedConnectedAccounts));
+    setLoaded(true);
   }, []);
 
-  useEffect(() => { if (loaded) window.storage.set("transactions", JSON.stringify(transactions)).catch(() => {}); }, [transactions, loaded]);
-  useEffect(() => { if (loaded) window.storage.set("recurringTemplates", JSON.stringify(templates)).catch(() => {}); }, [templates, loaded]);
-  useEffect(() => { if (loaded) window.storage.set("goals", JSON.stringify(goals)).catch(() => {}); }, [goals, loaded]);
-  useEffect(() => { if (loaded) window.storage.set("assets", JSON.stringify(assets)).catch(() => {}); }, [assets, loaded]);
-  useEffect(() => { if (loaded) window.storage.set("connectedAccounts", JSON.stringify(connectedAccounts)).catch(() => {}); }, [connectedAccounts, loaded]);
+  useEffect(() => { if (loaded) { try { localStorage.setItem("cifra_transactions", JSON.stringify(transactions)); } catch (e) {} } }, [transactions, loaded]);
+  useEffect(() => { if (loaded) { try { localStorage.setItem("cifra_templates", JSON.stringify(templates)); } catch (e) {} } }, [templates, loaded]);
+  useEffect(() => { if (loaded) { try { localStorage.setItem("cifra_goals", JSON.stringify(goals)); } catch (e) {} } }, [goals, loaded]);
+  useEffect(() => { if (loaded) { try { localStorage.setItem("cifra_assets", JSON.stringify(assets)); } catch (e) {} } }, [assets, loaded]);
+  useEffect(() => { if (loaded) { try { localStorage.setItem("cifra_connected_accounts", JSON.stringify(connectedAccounts)); } catch (e) {} } }, [connectedAccounts, loaded]);
 
   // gera automaticamente o lançamento do mês para cada modelo fixo, se ainda não existir
   useEffect(() => {
